@@ -25,7 +25,12 @@ jobs:
         with:
           node-version: 22
       - name: Pobierz plan (edupage + cku.home.pl)
+        id: scrape
+        continue-on-error: true   # gdy źródła nie odpowiadają, publikujemy ostatni zapisany plan
         run: node scrape.js
+      - name: Ostrzeżenie o nieudanym pobieraniu
+        if: steps.scrape.outcome == 'failure'
+        run: echo "::warning::Nie udało się pobrać planu — opublikowano ostatnie zapisane dane."
       - name: Zapisz zmiany w danych
         run: |
           git config user.name "plan-bot"

@@ -17,9 +17,31 @@ const CONFIG = {
 const pad = n => String(n).padStart(2, "0");
 const log = (...a) => console.log(...a);
 
+// fetch z limitem czasu i ponawianiem — serwery szkolne (i sieć GitHub Actions) bywają kapryśne.
+async function http(url, opts = {}, tries = 4) {
+  let last;
+  for (let i = 1; i <= tries; i++) {
+    try {
+      const res = await fetch(url, {
+        ...opts,
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; plan-lekcji-bot; +https://github.com/aszarnecki/plan-lekcji)", ...(opts.headers || {}) },
+        signal: AbortSignal.timeout(30000),
+      });
+      if (res.status >= 500 && i < tries) throw new Error("HTTP " + res.status);
+      return res;
+    } catch (e) {
+      last = e;
+      const why = e.cause?.code || e.cause?.message || e.message;
+      log(`  … próba ${i}/${tries} nieudana (${url.split("/").slice(2, 4).join("/")}): ${why}`);
+      if (i < tries) await new Promise(r => setTimeout(r, i * 3000));
+    }
+  }
+  throw last;
+}
+
 /* ---------------- edupage ---------------- */
 async function fetchEdupage() {
-  const res = await fetch(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
+  const res = await http(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: "00000000" }),
@@ -122,7 +144,7 @@ function parseCku(html, expected) {
 
 async function fetchCku(dates) {
   const url = `${CONFIG.ckuBase}plan_${dates[0].slice(8)}_${dates[1].slice(8)}_${dates[0].slice(5, 7)}.htm`;
-  const res = await fetch(url);
+  const res = await http(url);
   if (!res.ok) return { url, status: res.status, data: null };
   const html = new TextDecoder("windows-1250").decode(await res.arrayBuffer());
   return { url, status: 200, data: parseCku(html, dates) };
@@ -132,7 +154,7 @@ async function fetchCku(dates) {
 // Zwraca zbiór dat (YYYY-MM-DD) oznaczonych "x" dla naszej klasy.
 async function fetchHarmonogram() {
   const url = CONFIG.ckuBase + CONFIG.harmonogram;
-  const res = await fetch(url);
+  const res = await http(url);
   if (!res.ok) throw new Error("harmonogram HTTP " + res.status);
   const html = new TextDecoder("windows-1250").decode(await res.arrayBuffer());
   const g = tableGrid(html);
@@ -168,9 +190,19 @@ const compact = a => (a.every(x => !x) ? [] : a);
   const weeks = buildFromEdupage(await fetchEdupage());
   log(`  ${weeks.length} zjazdów w planie bazowym`);
 
+  let oldWeeks = [];
+  try { oldWeeks = JSON.parse(fs.readFileSync(path.join(__dirname, "schedule.json"), "utf8")).weekends; } catch {}
   log("cku.home.pl…");
   for (const w of weeks) {
-    const { url, status, data } = await fetchCku(w.dates);
+    let r;
+    try { r = await fetchCku(w.dates); }
+    catch (e) {
+      const prev = oldWeeks.find(o => o.dates[0] === w.dates[0] && o.source === "cku");
+      if (prev) { Object.assign(w, { days: prev.days, rooms: prev.rooms, notes: prev.notes, source: "cku", ckuUrl: prev.ckuUrl }); log(`  ~ ${w.dates[0]}: błąd sieci (${e.message}), zostawiam poprzednie dane z cku`); }
+      else log(`  ! ${w.dates[0]}: błąd sieci (${e.message}), zostaje plan z edupage`);
+      continue;
+    }
+    const { url, status, data } = r;
     const file = url.split("/").pop();
     if (status !== 200) { log(`  - ${w.dates[0]}: brak pliku ${file} (HTTP ${status})`); continue; }
     if (!data) { log(`  - ${w.dates[0]}: ${file} jest, ale bez klasy ${CONFIG.className} (klasa nie ma tego zjazdu)`); continue; }
