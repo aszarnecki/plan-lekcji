@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<title>Plan zajęć</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f2f3f8; --surface:#fff; --text:#0f1424; --muted:#6a7389; --line:#e4e7f0; --soft:#eceef6;
+    --accent:#4f46e5; --tint:20%; --shadow:0 1px 2px rgba(15,20,36,.05), 0 14px 34px -18px rgba(15,20,36,.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0c0f16; --surface:#151a25; --text:#eef0f7; --muted:#8e97ad; --line:#252c3b; --soft:#1d2332; --accent:#8b93ff; --tint:24%;
+            --shadow:0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7); }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 Manrope,system-ui,Segoe UI,Roboto,sans-serif; padding-bottom:96px; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  .wrap { max-width:960px; margin:0 auto; padding:0 16px; }
+
+  /* top bar */
+  .top { padding:max(18px,env(safe-area-inset-top)) 0 14px; display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .top h1 { margin:0; font-size:22px; font-weight:800; letter-spacing:-.03em; }
+  .top span { color:var(--muted); font-size:13px; font-weight:500; }
+
+  /* hero */
+  .hero { position:relative; overflow:hidden; border-radius:28px; padding:26px 24px 22px; color:#fff;
+          background:radial-gradient(120% 140% at 100% 0%, #ec4899 0%, transparent 55%), linear-gradient(135deg,#4f46e5,#6d28d9); box-shadow:0 22px 40px -22px #4f46e5; }
+  .hero.past { background:var(--surface); color:var(--text); box-shadow:var(--shadow); border:1px solid var(--line); }
+  .hero .eyebrow { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; background:rgba(255,255,255,.2); padding:5px 11px; border-radius:99px; }
+  .hero.past .eyebrow { background:var(--soft); color:var(--muted); }
+  .hero .when { font-size:clamp(38px,9vw,60px); font-weight:800; letter-spacing:-.045em; line-height:1; margin:16px 0 6px; }
+  .hero .sub { opacity:.85; font-weight:500; }
+  .hero .stats { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .stat { background:rgba(255,255,255,.16); border-radius:12px; padding:7px 12px; font-size:13px; font-weight:600; }
+  .hero.past .stat { background:var(--soft); }
+  .stat b { font-weight:800; }
+  .mods-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .code { display:inline-block; font-weight:800; font-size:12px; letter-spacing:.01em; padding:3px 9px; border-radius:8px; background:var(--c); color:#0f1424; }
+
+  /* day switch */
+  .switch { display:flex; gap:6px; background:var(--soft); padding:5px; border-radius:16px; margin:20px 0 14px; }
+  .switch button { flex:1; border:0; background:none; padding:10px 6px; border-radius:12px; font-weight:700; color:var(--muted); text-transform:capitalize; }
+  .switch button small { display:block; font-weight:500; font-size:12px; }
+  .switch button.on { background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+  @media (min-width:900px){ .switch { display:none; } }
+
+  /* days */
+  .days { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); gap:18px; margin-top:20px; }
+  @media (max-width:899px){ .days { margin-top:0; grid-template-columns:1fr; } .day:not(.sel) { display:none; } }
+  .day { background:var(--surface); border-radius:26px; padding:20px 16px 12px; box-shadow:var(--shadow); border:1px solid var(--line); }
+  .day.is-today { border-color:var(--accent); }
+  .dh { display:flex; justify-content:space-between; align-items:baseline; margin:0 6px 14px; }
+  .dh h2 { margin:0; font-size:24px; font-weight:800; letter-spacing:-.03em; text-transform:capitalize; }
+  .dh h2 small { font-size:14px; color:var(--muted); font-weight:500; letter-spacing:0; text-transform:none; margin-left:6px; }
+  .dh .rng { font-size:13px; font-weight:700; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .run { display:grid; grid-template-columns:50px 1fr; gap:10px; }
+  .tm { text-align:right; font-variant-numeric:tabular-nums; font-size:13px; font-weight:700; padding-top:14px; }
+  .tm span { display:block; color:var(--muted); font-weight:500; }
+  .card { position:relative; border-radius:18px; padding:14px 16px 14px 20px; overflow:hidden;
+          background:color-mix(in srgb, var(--c) var(--tint), var(--surface)); }
+  .card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--c); }
+  .card .nm { font-size:16px; font-weight:700; line-height:1.3; letter-spacing:-.01em; margin:7px 0 10px; }
+  .card .meta { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:12.5px; font-weight:600; color:var(--muted); }
+  .card .meta .t { color:var(--text); }
+  .badge { font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; padding:3px 8px; border-radius:99px; background:var(--text); color:var(--bg); margin-left:6px; vertical-align:2px; }
+  .live { box-shadow:0 0 0 2.5px var(--c); }
+  .brk { margin:8px 0 8px 60px; font-size:12px; font-weight:600; color:var(--muted); display:flex; align-items:center; gap:10px; }
+  .brk::after { content:""; flex:1; border-top:1px dashed var(--line); }
+  .free { padding:34px 8px; text-align:center; color:var(--muted); font-weight:500; }
+
+  /* all weekends */
+  .list { display:grid; gap:12px; }
+  .wk { width:100%; text-align:left; border:1px solid var(--line); background:var(--surface); border-radius:22px; padding:16px 18px; box-shadow:var(--shadow); display:block; }
+  .wk .r { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .wk b { font-size:18px; font-weight:800; letter-spacing:-.02em; }
+  .wk .d { color:var(--muted); font-weight:500; font-size:13px; }
+  .st { font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; padding:4px 10px; border-radius:99px; background:var(--soft); color:var(--muted); white-space:nowrap; }
+  .st.next { background:var(--accent); color:#fff; }
+  .st.now { background:#16a34a; color:#fff; }
+  .wk.off { opacity:.55; }
+  .back { border:0; background:none; color:var(--accent); font-weight:700; padding:6px 0 14px; }
+
+  /* modules */
+  .mods { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:12px; }
+  .mod { background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:16px; box-shadow:var(--shadow); }
+  .mod h3 { margin:10px 0 2px; font-size:15px; font-weight:700; line-height:1.3; }
+  .bar { height:8px; background:var(--soft); border-radius:99px; overflow:hidden; margin:12px 0 6px; }
+  .bar i { display:block; height:100%; background:var(--c); border-radius:99px; }
+  .sm { font-size:12.5px; color:var(--muted); font-weight:500; }
+  .foot { text-align:center; color:var(--muted); font-size:12px; margin:28px 0 0; }
+  .sec { margin:6px 2px 14px; font-size:20px; font-weight:800; letter-spacing:-.03em; }
+
+  /* tab bar */
+  nav { position:fixed; left:0; right:0; bottom:0; padding:10px 16px max(12px,env(safe-area-inset-bottom)); z-index:10;
+        background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:blur(18px); border-top:1px solid var(--line); }
+  nav div { max-width:520px; margin:0 auto; display:flex; gap:6px; }
+  nav button { flex:1; border:0; background:none; padding:7px 4px 5px; border-radius:14px; color:var(--muted); font-size:11.5px; font-weight:700; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  nav button svg { width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+  nav button.on { color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); }
+  @media (min-width:900px){ body { padding-bottom:40px; } nav { position:static; background:none; backdrop-filter:none; border:0; padding:0 16px; max-width:960px; margin:0 auto 18px; } nav div { max-width:none; background:var(--soft); padding:5px; border-radius:16px; width:fit-content; } nav button { flex-direction:row; gap:8px; padding:9px 18px; font-size:14px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><h1>Plan zajęć</h1><span id="today"></span></div>
+</div>
+<nav><div id="nav"></div></nav>
+<main class="wrap" id="app"></main>
+
+<script src="data.js"></script>
+<script src="schedule.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, "0");
+const DAYS = ["niedziela","poniedziałek","wtorek","środa","czwartek","piątek","sobota"];
+const MONTHS_G = ["stycznia","lutego","marca","kwietnia","maja","czerwca","lipca","sierpnia","września","października","listopada","grudnia"];
+
+// Do testów: index.html?today=2026-09-05  albo  ?today=2026-09-05T10:30
+const P = new URLSearchParams(location.search);
+const NOW = P.get("today") ? new Date(P.get("today").length === 10 ? P.get("today") + "T09:00" : P.get("today")) : new Date();
+const isoOf = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const TODAY = isoOf(NOW), NOWMIN = NOW.getHours() * 60 + NOW.getMinutes();
+
+const D = iso => new Date(iso + "T12:00:00");
+const dow = iso => DAYS[D(iso).getDay()];
+const dnum = iso => +iso.slice(8);
+const mon = iso => MONTHS_G[+iso.slice(5, 7) - 1];
+const diffDays = (a, b) => Math.round((D(a) - D(b)) / 864e5);
+const mins = t => +t.slice(0, 2) * 60 + +t.slice(3);
+const color = code => TEACHERS[MODULES[code].teacher];
+const hasData = arr => arr.some(Boolean);
+const isZjazd = w => w.zjazd !== false && (w.zjazd === true || Object.values(w.days).some(a => a.some(Boolean)));
+const wdates = w => Object.keys(w.days);
+const weekHasData = w => Object.values(w.days).some(hasData);
+const wfirst = w => wdates(w)[0], wlast = w => wdates(w).slice(-1)[0];
+const plural = (n, a, b, c) => n === 1 ? a : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? b : c;
+const hrs = n => n * 2; // 1 blok = 2 godz. lekcyjne
+
+function runs(blocks) {
+  const out = [];
+  blocks.forEach((code, i) => {
+    const last = out[out.length - 1];
+    if (code && last && last.code === code && last.to === i - 1) last.to = i;
+    else if (code) out.push({ code, from: i, to: i });
+  });
+  return out;
+}
+
+function rangeLabel(w) {
+  const a = wfirst(w), b = wlast(w);
+  return mon(a) === mon(b) ? `${dnum(a)}–${dnum(b)} ${mon(a)} ${a.slice(0,4)}` : `${dnum(a)} ${mon(a)} – ${dnum(b)} ${mon(b)} ${a.slice(0,4)}`;
+}
+
+/* --- który zjazd jest najbliższy? --- */
+function nearest() {
+  const withData = WEEKENDS.map((w, i) => i).filter(i => isZjazd(WEEKENDS[i]));
+  const up = withData.find(i => wlast(WEEKENDS[i]) >= TODAY);
+  return up !== undefined ? { i: up, past: false } : { i: withData[withData.length - 1], past: true };
+}
+function weekStatus(i) {
+  const w = WEEKENDS[i];
+  if (!isZjazd(w)) return { k: "none", t: "Brak zjazdu" };
+  if (!weekHasData(w) && wlast(w) >= TODAY) return { k: "later", t: "Plan wkrótce" };
+  if (wfirst(w) <= TODAY && TODAY <= wlast(w)) return { k: "now", t: "Trwa" };
+  if (wlast(w) < TODAY) return { k: "done", t: "Zakończony" };
+  return nearest().i === i ? { k: "next", t: "Najbliższy" } : { k: "later", t: "Zaplanowany" };
+}
+
+/* --- pieces --- */
+const codeChip = c => `<span class="code" style="--c:${color(c)}">${c}</span>`;
+
+function hero(i, past, label) {
+  const w = WEEKENDS[i];
+  const blocksN = Object.values(w.days).reduce((s, a) => s + a.filter(Boolean).length, 0);
+  const daysN = Object.values(w.days).filter(hasData).length;
+  const codes = [...new Set(Object.values(w.days).flat().filter(Boolean))];
+  let when, sub;
+  if (past) {
+    const n = diffDays(TODAY, wlast(w));
+    when = "Brak nowych zjazdów";
+    sub = `Ostatni zjazd był ${n} ${plural(n, "dzień", "dni", "dni")} temu. Nowe terminy pojawią się po aktualizacji planu.`;
+  } else if (wfirst(w) <= TODAY && TODAY <= wlast(w)) {
+    when = "Dziś"; sub = `Zjazd w toku · ${rangeLabel(w)}`;
+  } else {
+    const n = diffDays(wfirst(w), TODAY);
+    when = n === 1 ? "Jutro" : `Za ${n} ${plural(n, "dzień", "dni", "dni")}`;
+    sub = `${dow(wfirst(w))}–${dow(wlast(w))}, ${rangeLabel(w)}`;
+  }
+  return `<section class="hero ${past ? "past" : ""}">
+    <span class="eyebrow">${past ? "Ostatni znany zjazd" : label}</span>
+    <div class="when">${when}</div><div class="sub">${sub}</div>
+    <div class="stats"><span class="stat">Tydzień <b>${w.week}</b></span>${blocksN ? "" : '<span class="stat">Plan jeszcze nie opublikowany</span>'}${!blocksN ? "<span hidden>" : ""}
+      <span class="stat"><b>${daysN}</b> ${plural(daysN, "dzień", "dni", "dni")}</span>
+      <span class="stat"><b>${blocksN}</b> ${plural(blocksN, "blok", "bloki", "bloków")}</span>
+      <span class="stat"><b>${hrs(blocksN)}</b> godz.</span>${!blocksN ? "</span>" : ""}</div>
+    <div class="mods-row">${codes.map(codeChip).join("")}</div></section>`;
+}
+
+function dayCard(iso, arr, sel, w) {
+  const rs = runs(arr), isToday = iso === TODAY;
+  let h = `<article class="day ${isToday ? "is-today" : ""} ${sel ? "sel" : ""}"><div class="dh"><h2>${dow(iso)}<small>${dnum(iso)} ${mon(iso)}</small></h2>`;
+  if (rs.length) h += `<span class="rng">${BLOCKS[rs[0].from].start}–${BLOCKS[rs.at(-1).to].end}</span>`;
+  h += `</div>`;
+  if (!rs.length) return h + `<div class="free">${w.zjazd && !weekHasData(w) ? "Plan jeszcze nie opublikowany" : "Brak zajęć"}</div></article>`;
+  const nextIdx = isToday ? rs.findIndex(r => mins(BLOCKS[r.from].start) > NOWMIN) : -1;
+  rs.forEach((r, k) => {
+    const s = BLOCKS[r.from].start, e = BLOCKS[r.to].end, m = MODULES[r.code], n = r.to - r.from + 1;
+    if (k > 0) {
+      const gap = mins(s) - mins(BLOCKS[rs[k-1].to].end);
+      if (gap > 0) h += `<div class="brk">przerwa ${gap} min</div>`;
+    }
+    const room = w.rooms?.[iso]?.[r.from], note = w.notes?.[iso]?.[r.from];
+    const live = isToday && mins(s) <= NOWMIN && NOWMIN < mins(e);
+    const badge = live ? `<span class="badge">trwa</span>` : (k === nextIdx ? `<span class="badge">następne</span>` : "");
+    h += `<div class="run"><div class="tm">${s}<span>${e}</span></div>
+      <div class="card ${live ? "live" : ""}" style="--c:${color(r.code)}">${codeChip(r.code)}${badge}
+        <div class="nm">${m.name}</div>
+        <div class="meta"><span class="t">${note ? "⚠ " + note : m.teacher}</span>${room ? `<span>·</span><span>sala ${room}</span>` : ""}<span>·</span><span>${n} ${plural(n, "blok", "bloki", "bloków")} · ${hrs(n)} godz.</span></div></div></div>`;
+  });
+  return h + `</article>`;
+}
+
+function weekend(i, opts = {}) {
+  const w = WEEKENDS[i], ds = wdates(w);
+  if (state.dayFor !== i) { state.day = Math.max(0, ds.indexOf(TODAY)); state.dayFor = i; }
+  let h = opts.hero || "";
+  h += `<div class="switch">` + ds.map((d, k) => `<button data-day="${k}" class="${k === state.day ? "on" : ""}">${dow(d)}<small>${dnum(d)}.${d.slice(5,7)}</small></button>`).join("") + `</div>`;
+  h += `<div class="days">` + ds.map((d, k) => dayCard(d, w.days[d], k === state.day, w)).join("") + `</div>`;
+  return h;
+}
+
+/* --- pages --- */
+function pageHome() {
+  const n = nearest();
+  return weekend(n.i, { hero: hero(n.i, n.past, "Najbliższy zjazd") });
+}
+function pageAll() {
+  if (state.open != null) {
+    const i = state.open, w = WEEKENDS[i];
+    return `<button class="back" data-back>← Wszystkie zjazdy</button>` +
+      (weekHasData(w) ? weekend(i, { hero: hero(i, wlast(w) < TODAY, "Zjazd") }) : `<div class="free">Plan na ten zjazd nie jest jeszcze dostępny.</div>`);
+  }
+  let h = `<div class="sec">Wszystkie zjazdy</div><div class="list">`;
+  WEEKENDS.forEach((w, i) => {
+    if (!isZjazd(w)) return;
+    const st = weekStatus(i), codes = [...new Set(Object.values(w.days).flat().filter(Boolean))];
+    h += `<button class="wk ${st.k === "none" ? "off" : ""}" data-open="${i}"><div class="r"><div><b>Tydzień ${w.week}</b><div class="d">${rangeLabel(w)}</div></div><span class="st ${st.k}">${st.t}</span></div>
+      ${codes.length ? `<div class="mods-row">${codes.map(codeChip).join("")}</div>` : ""}</button>`;
+  });
+  return h + `</div>`;
+}
+function pageMods() {
+  const used = {}, dates = {};
+  WEEKENDS.forEach(w => Object.entries(w.days).forEach(([d, arr]) => arr.forEach(c => {
+    if (!c) return; used[c] = (used[c] || 0) + 1; (dates[c] = dates[c] || new Set()).add(d);
+  })));
+  let h = `<div class="sec">Moduły</div><div class="mods">`;
+  Object.entries(MODULES).forEach(([c, m]) => {
+    const done = (used[c] || 0) * 1.5, pct = Math.min(100, done / m.hours * 100);
+    h += `<div class="mod" style="--c:${color(c)}">${codeChip(c)} <span class="sm">&nbsp;${m.teacher}</span><h3>${m.name}</h3>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="sm">${hrs(used[c] || 0)} z ${m.hours} godz. zaplanowane${dates[c] ? " · " + [...dates[c]].map(d => dnum(d) + "." + d.slice(5,7)).join(", ") : ""}</div></div>`;
+  });
+  return h + `</div>`;
+}
+
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',
+  all:  '<svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r=".8"/><circle cx="4" cy="12" r=".8"/><circle cx="4" cy="18" r=".8"/></svg>',
+  mods: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>',
+};
+const TABS = [["home", "Najbliższy zjazd"], ["all", "Zjazdy"], ["mods", "Moduły"]];
+const state = { tab: "home", open: null, day: null, dayFor: null };
+
+function render() {
+  $("#nav").innerHTML = TABS.map(([k, t]) => `<button data-tab="${k}" class="${state.tab === k ? "on" : ""}">${ICONS[k]}${t}</button>`).join("");
+  $("#app").innerHTML = { home: pageHome, all: pageAll, mods: pageMods }[state.tab]() +
+    (window.SCHEDULE_META ? `<p class="foot">Dane: edupage + cku.home.pl · klasa ${SCHEDULE_META.className} · zaktualizowano ${new Date(SCHEDULE_META.generatedAt).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" })}</p>` : "");
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tab]"), d = e.target.closest("[data-day]"), o = e.target.closest("[data-open]"), b = e.target.closest("[data-back]");
+  if (t) { state.tab = t.dataset.tab; state.open = null; window.scrollTo(0, 0); }
+  else if (d) state.day = +d.dataset.day;
+  else if (o) { state.open = +o.dataset.open; window.scrollTo(0, 0); }
+  else if (b) state.open = null;
+  else return;
+  render();
+});
+
+$("#today").textContent = `Dziś: ${dow(TODAY)}, ${dnum(TODAY)} ${mon(TODAY)}`;
+render();
+</script>
+</body>
+</html>

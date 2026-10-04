@@ -1,0 +1,53 @@
+name: Aktualizuj plan i publikuj
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # co 3 godziny (UTC)
+  workflow_dispatch:         # ręczne uruchomienie z zakładki Actions
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pobierz plan (edupage + cku.home.pl)
+        run: node scrape.js
+      - name: Zapisz zmiany w danych
+        run: |
+          git config user.name "plan-bot"
+          git config user.email "plan-bot@users.noreply.github.com"
+          git add schedule.js schedule.json
+          git diff --cached --quiet || git commit -m "Aktualizacja planu $(date -u +%F\ %H:%M) UTC"
+          git push || true
+      - name: Zbierz pliki strony
+        run: |
+          mkdir _site
+          cp index.html data.js schedule.js schedule.json _site/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
