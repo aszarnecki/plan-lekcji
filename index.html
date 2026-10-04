@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="pl">
+<html lang="pl" data-theme="szklo">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#0c0e15">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -91,6 +91,18 @@
   .st.next { background:var(--accent); color:#fff; }
   .st.now { background:#16a34a; color:#fff; }
   .wk.off { opacity:.55; }
+  .grp { margin:22px 4px 10px; font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+  .wk { position:relative; transition:transform .15s, opacity .15s; }
+  .wk .rt { display:flex; align-items:center; gap:10px; }
+  .when2 { font-weight:800; font-size:15px; letter-spacing:-.02em; color:var(--accent); }
+  .wk.hot { border:2px solid var(--accent); padding:15px 17px 15px 21px; box-shadow:0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent), var(--shadow); }
+  .wk.hot::before { content:""; position:absolute; left:0; top:14px; bottom:14px; width:5px; border-radius:0 4px 4px 0; background:var(--accent); }
+  .wk.hot b { font-size:21px; }
+  .st.now::before { content:""; display:inline-block; width:7px; height:7px; border-radius:50%; background:#fff; margin-right:6px; animation:pulse 1.4s infinite; }
+  @keyframes pulse { 50% { opacity:.3; } }
+  .wk.done { background:transparent; box-shadow:none; opacity:.55; }
+  .wk.done .code { filter:grayscale(.85); }
+  .wk.done:hover { opacity:.9; }
   .back { border:0; background:none; color:var(--accent); font-weight:700; padding:6px 0 14px; }
 
   /* modules */
@@ -113,11 +125,94 @@
   nav button svg { width:23px; height:23px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   nav button.on { color:var(--accent); background:color-mix(in srgb, var(--accent) 12%, transparent); }
   @media (min-width:900px){ body { padding-bottom:40px; } nav { position:static; background:none; backdrop-filter:none; border:0; padding:0 16px; max-width:960px; margin:0 auto 18px; } nav div { max-width:none; background:var(--soft); padding:5px; border-radius:16px; width:fit-content; } nav button { flex-direction:row; gap:8px; padding:9px 18px; font-size:14px; } }
+
+  /* ================= MOTYWY ================= */
+  :root {
+    --r:28px; --r2:18px; --font:Manrope,system-ui,Segoe UI,Roboto,sans-serif; --hfont:var(--font);
+    --hero-bg:radial-gradient(120% 140% at 100% 0%, #ec4899 0%, transparent 55%), linear-gradient(135deg,#4f46e5,#6d28d9);
+    --hero-fg:#fff; --hero-shadow:0 22px 40px -22px #4f46e5; --chip:rgba(255,255,255,.18); --blur:none; --bgimg:none;
+  }
+  body { font-family:var(--font); background-color:var(--bg); background-image:var(--bgimg); background-attachment:fixed; }
+  .top h1, .hero .when, .dh h2, .sec, .wk b { font-family:var(--hfont); }
+  .hero { border-radius:var(--r); background:var(--hero-bg); color:var(--hero-fg); box-shadow:var(--hero-shadow); }
+  .hero.past { background:var(--surface); color:var(--text); box-shadow:var(--shadow); }
+  .hero .eyebrow, .stat { background:var(--chip); }
+  .hero.past .eyebrow, .hero.past .stat { background:var(--soft); }
+  .day, .wk, .mod { border-radius:calc(var(--r) - 2px); backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur); }
+  .card { border-radius:var(--r2); }
+  .top { flex-wrap:wrap; }
+  .top #today { order:3; flex-basis:100%; }
+
+  /* --- Szkło: ciemne tło z poświatą, półprzezroczyste panele --- */
+  :root[data-theme="szklo"] {
+    --bg:#0c0e15; --surface:rgba(255,255,255,.055); --text:#eef0f6; --muted:#9aa1b5; --line:rgba(255,255,255,.1); --soft:rgba(255,255,255,.06); --accent:#9aa8ff; --tint:26%;
+    --shadow:0 10px 40px -18px rgba(0,0,0,.6); --r:30px; --r2:20px; --blur:blur(22px) saturate(140%);
+    --bgimg:radial-gradient(70% 45% at 10% 0%, rgba(99,102,241,.20), transparent 70%), radial-gradient(60% 40% at 100% 15%, rgba(56,189,248,.10), transparent 70%), radial-gradient(70% 40% at 60% 100%, rgba(139,92,246,.12), transparent 70%);
+    --hero-bg:radial-gradient(90% 120% at 100% 0%, rgba(236,72,153,.38), transparent 60%), linear-gradient(135deg, rgba(99,102,241,.62), rgba(124,58,237,.38)); --hero-fg:#fff; --hero-shadow:inset 0 1px 0 rgba(255,255,255,.35), 0 24px 60px -24px rgba(99,102,241,.75); --chip:rgba(255,255,255,.14);
+    color-scheme:dark;
+  }
+  :root[data-theme="szklo"] .hero { border:1px solid rgba(165,180,252,.5); backdrop-filter:var(--blur); }
+  :root[data-theme="szklo"] .hero.past { border-color:var(--line); }
+  :root[data-theme="szklo"] .card { border:1px solid rgba(255,255,255,.12); }
+
+  /* easter egg: tramwaje przy zajęciach z Le. Dę. */
+  .code.tram::before { content:"🚋"; margin-right:4px; font-size:11px; }
+  .card.tram { padding-bottom:52px; color:var(--text); }
+  .card.tram::after { content:""; position:absolute; left:6px; right:0; bottom:7px; height:9px; opacity:.4;
+    background: linear-gradient(currentColor,currentColor) 0 1px/100% 2px no-repeat,
+                linear-gradient(currentColor,currentColor) 0 6px/100% 2px no-repeat,
+                repeating-linear-gradient(90deg, currentColor 0 2px, transparent 2px 11px); }
+  .tramtrack { position:absolute; left:6px; right:0; bottom:11px; height:38px; overflow:hidden; pointer-events:none; z-index:1; }
+  .tramtrack > * { position:absolute; display:block; }
+  .tramtrack .wire { left:0; right:0; bottom:27px; height:1px; background:currentColor; opacity:.3; }
+  .tramtrack .mast { bottom:0; width:2px; height:34px; background:currentColor; opacity:.28; border-radius:1px; }
+  .tramico { left:0; bottom:0; width:84px; z-index:3; transform:translateX(-100px); pointer-events:auto; cursor:pointer; }
+  .tramico svg { display:block; width:100%; overflow:visible; }
+  .tramico .tb { fill:#f4f6fb; } .tramico .tw { fill:var(--c); } .tramico .band { fill:var(--c); }
+  .tramico .td { fill:#d6dbe8; stroke:#aab2c5; stroke-width:.6; }
+  .tramico .bl { fill:#8a93a8; } .tramico .blk { stroke:#6d768b; stroke-width:.8; }
+  .tramico .eq { fill:#cfd6e4; } .tramico .fr { fill:#2a3142; } .tramico .tk { fill:#1c2230; }
+  .tramico .pg { fill:none; stroke:#e9edf6; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .tramico.open .td { fill:#1c2230; stroke:#facc15; }
+  .tramico.dark .tw { fill:#1c2230; }
+  @keyframes hop { 0%, 100% { translate:0 0; } 40% { translate:0 -7px; } }
+  .tramico.hop { animation:hop .35s ease-out; }
+  /* przystanek: wyłania się spod toru, gdy tramwaj się zbliża */
+  .tramstop { left:0; bottom:0; width:130px; height:36px; z-index:2; transform:translateY(105%); opacity:0; transition:transform .7s cubic-bezier(.2,1.5,.4,1), opacity .4s; }
+  .tramstop.show { transform:none; opacity:1; }
+  .tramstop > * { position:absolute; display:block; }
+  .tramstop .plat { left:0; right:0; bottom:0; height:7px; background:color-mix(in srgb, currentColor 45%, transparent); border-radius:3px 3px 0 0; border-top:1px solid color-mix(in srgb, currentColor 70%, transparent); }
+  .tramstop .pole { left:9px; bottom:7px; width:2px; height:29px; background:color-mix(in srgb, currentColor 80%, transparent); }
+  .tramstop .sign { position:absolute; display:block; left:-10px; top:-5px; width:22px; height:18px; background:#facc15; border-radius:3px; box-shadow:0 1px 4px rgba(0,0,0,.5); }
+  .tramstop .sign svg { width:100%; height:100%; } .tramstop .sign rect:first-child, .tramstop .sign circle { fill:#111; }
+  .tramstop .pp { bottom:7px; width:8px; height:16px; z-index:1; fill:currentColor; opacity:.9; }
+  .tramstop .pp svg { display:block; width:100%; height:100%; }
+  .tramstop .w1 { left:110px; } .tramstop .w2 { left:120px; }
+  .tramstop .leave { left:78px; opacity:0; } .tramstop .l2 { left:70px; }
+  @keyframes walkIn { 0% { transform:none; opacity:.9; } 80% { opacity:.9; } 100% { transform:translateX(-36px); opacity:0; } }
+  @keyframes walkOut { 0% { transform:translateX(-20px); opacity:0; } 15% { opacity:.9; } 85% { opacity:.9; } 100% { transform:translateX(34px); opacity:0; } }
+  .tramstop.boarding .wait { animation:walkIn 1.3s .2s linear forwards; }
+  .tramstop.boarding .w2 { animation-delay:.6s; }
+  .tramstop.boarding .leave { animation:walkOut 1.7s .3s linear forwards; }
+  .tramstop.boarding .l2 { animation-delay:.8s; }
+  .tramtrack .obst { left:0; bottom:1px; font-size:17px; line-height:1; opacity:0; z-index:3; }
+  .tramtrack .obst.on { opacity:1; }
+  .tramtrack .obst.jump { animation:duckjump .6s ease-in forwards; }
+  @keyframes duckjump { 0% { translate:0 0; opacity:1; } 50% { translate:0 -18px; opacity:1; } 100% { translate:12px -4px; opacity:0; } }
+  .tramtrack .spark { left:0; bottom:20px; font-size:14px; line-height:1; opacity:0; z-index:4; }
+  .tramtrack .spark.on { opacity:1; }
+  .tbubble { position:absolute; bottom:58px; transform:translateX(-50%) scale(.6); transform-origin:50% 100%; opacity:0; background:#fff; color:#1c2230;
+    font-weight:800; font-size:12px; padding:5px 10px; border-radius:12px; white-space:nowrap; pointer-events:none; z-index:4;
+    box-shadow:0 4px 14px rgba(0,0,0,.35); transition:opacity .15s, transform .15s; }
+  .tbubble.show { opacity:1; transform:translateX(-50%) scale(1); }
+  .tbubble::after { content:""; position:absolute; left:calc(50% + var(--tx, 0px)); bottom:-4px; width:9px; height:9px; background:#fff; transform:translateX(-50%) rotate(45deg); border-radius:2px; }
+  @media (prefers-reduced-motion: reduce) { .tramico { left:auto; right:6px; transform:none !important; } .tramstop { display:none; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top"><h1>Plan zajęć</h1><span id="today"></span></div>
+  <div class="top"><h1>Plan zajęć</h1>
+    <span id="today"></span></div>
 </div>
 <nav><div id="nav"></div></nav>
 <main class="wrap" id="app"></main>
@@ -182,9 +277,32 @@ function weekStatus(i) {
 }
 
 /* --- pieces --- */
-const codeChip = c => `<span class="code" style="--c:${color(c)}">${c}</span>`;
+const TRAM_TEACHER = "Le. Dę.";
+const isTram = c => MODULES[c].teacher === TRAM_TEACHER;
+const codeChip = c => `<span class="code${isTram(c) ? " tram" : ""}" style="--c:${color(c)}">${c}</span>`;
+const PERSON = '<svg viewBox="0 0 8 16"><circle cx="4" cy="3" r="2.4"/><rect x="1.2" y="6" width="5.6" height="7" rx="2"/><rect x="1.8" y="13" width="1.6" height="3"/><rect x="4.6" y="13" width="1.6" height="3"/></svg>';
+// 🚋 dwuczłonowy tramwaj z przegubem, wózkami i pantografem + przystanek, sieć trakcyjna i maszty
+const tramSvg = k => `<span class="tramtrack" aria-hidden="true">
+  <span class="mast" style="left:14px"></span><span class="mast" style="right:14px"></span><span class="wire"></span>
+  <span class="tramstop"><span class="plat"></span><span class="pole"><span class="sign"><svg viewBox="0 0 14 12"><rect x="1" y="3" width="12" height="5" rx="1.2"/><rect x="3" y="4.2" width="2.6" height="1.8" fill="#facc15"/><rect x="8.4" y="4.2" width="2.6" height="1.8" fill="#facc15"/><path d="M5 2.4 L7 .6 L9 2.4" fill="none" stroke="#111" stroke-width=".7"/><circle cx="4.2" cy="9" r=".9"/><circle cx="9.8" cy="9" r=".9"/></svg></span></span>
+    <span class="pp wait w1">${PERSON}</span><span class="pp wait w2">${PERSON}</span><span class="pp leave l1">${PERSON}</span><span class="pp leave l2">${PERSON}</span></span>
+  <span class="obst">🐗</span><span class="spark">⚡</span>
+  <span class="tramico"><svg viewBox="0 0 112 34">
+    <path class="pg" d="M46 10 L56 3 L66 10 M50 2.5 H62"/>
+    <rect class="eq" x="19" y="8.4" width="20" height="1.8" rx=".9"/><rect class="eq" x="73" y="8.4" width="20" height="1.8" rx=".9"/>
+    <rect class="bl" x="52" y="11" width="8" height="17"/><path class="blk" d="M54 11 V28 M56 11 V28 M58 11 V28"/>
+    <path class="tb" d="M3 20 Q3 10 13 10 H52 V28 H3 Z"/><path class="tb" d="M60 10 H99 Q109 10 109 20 V28 H60 Z"/>
+    <rect class="band" x="3" y="23" width="49" height="2.6"/><rect class="band" x="60" y="23" width="49" height="2.6"/>
+    <rect class="tw" x="7.5" y="13" width="8" height="8" rx="2"/><rect class="tw" x="19" y="13" width="8" height="7" rx="1.5"/><rect class="tw" x="29" y="13" width="7" height="7" rx="1.5"/>
+    <rect class="td" x="40" y="12.5" width="8" height="12" rx="1"/>
+    <rect class="td" x="64" y="12.5" width="8" height="12" rx="1"/>
+    <rect class="tw" x="76" y="13" width="7" height="7" rx="1.5"/><rect class="tw" x="86" y="13" width="8" height="7" rx="1.5"/><rect class="tw" x="97" y="13" width="8" height="8" rx="2"/>
+    <rect class="fr" x="3" y="28" width="106" height="2" rx="1"/>
+    <circle class="tk" cx="11" cy="31" r="2.5"/><circle class="tk" cx="22" cy="31" r="2.5"/><circle class="tk" cx="51" cy="31" r="2.5"/><circle class="tk" cx="61" cy="31" r="2.5"/><circle class="tk" cx="90" cy="31" r="2.5"/><circle class="tk" cx="101" cy="31" r="2.5"/>
+  </svg></span></span>`;
 
-function hero(i, past, label) {
+// fallback = true: nie ma już żadnych nadchodzących zjazdów (strona główna); false: oglądamy konkretny, minięty zjazd
+function hero(i, past, label, fallback = false) {
   const w = WEEKENDS[i];
   const blocksN = Object.values(w.days).reduce((s, a) => s + a.filter(Boolean).length, 0);
   const daysN = Object.values(w.days).filter(hasData).length;
@@ -192,8 +310,13 @@ function hero(i, past, label) {
   let when, sub;
   if (past) {
     const n = diffDays(TODAY, wlast(w));
-    when = "Brak nowych zjazdów";
-    sub = `Ostatni zjazd był ${n} ${plural(n, "dzień", "dni", "dni")} temu. Nowe terminy pojawią się po aktualizacji planu.`;
+    if (fallback) {
+      when = "Brak nowych zjazdów";
+      sub = `Ostatni zjazd był ${n} ${plural(n, "dzień", "dni", "dni")} temu. Nowe terminy pojawią się po aktualizacji planu.`;
+    } else {
+      when = `${n} ${plural(n, "dzień", "dni", "dni")} temu`;
+      sub = `${dow(wfirst(w))}–${dow(wlast(w))}, ${rangeLabel(w)}`;
+    }
   } else if (wfirst(w) <= TODAY && TODAY <= wlast(w)) {
     when = "Dziś"; sub = `Zjazd w toku · ${rangeLabel(w)}`;
   } else {
@@ -202,7 +325,7 @@ function hero(i, past, label) {
     sub = `${dow(wfirst(w))}–${dow(wlast(w))}, ${rangeLabel(w)}`;
   }
   return `<section class="hero ${past ? "past" : ""}">
-    <span class="eyebrow">${past ? "Ostatni znany zjazd" : label}</span>
+    <span class="eyebrow">${past ? (fallback ? "Ostatni znany zjazd" : "Zjazd zakończony") : label}</span>
     <div class="when">${when}</div><div class="sub">${sub}</div>
     <div class="stats"><span class="stat">Tydzień <b>${w.week}</b></span>${blocksN ? "" : '<span class="stat">Plan jeszcze nie opublikowany</span>'}${!blocksN ? "<span hidden>" : ""}
       <span class="stat"><b>${daysN}</b> ${plural(daysN, "dzień", "dni", "dni")}</span>
@@ -225,10 +348,11 @@ function dayCard(iso, arr, sel, w) {
       if (gap > 0) h += `<div class="brk">przerwa ${gap} min</div>`;
     }
     const room = w.rooms?.[iso]?.[r.from], note = w.notes?.[iso]?.[r.from];
+    const tram = isTram(r.code);
     const live = isToday && mins(s) <= NOWMIN && NOWMIN < mins(e);
     const badge = live ? `<span class="badge">trwa</span>` : (k === nextIdx ? `<span class="badge">następne</span>` : "");
     h += `<div class="run"><div class="tm">${s}<span>${e}</span></div>
-      <div class="card ${live ? "live" : ""}" style="--c:${color(r.code)}">${codeChip(r.code)}${badge}
+      <div class="card ${live ? "live" : ""}${tram ? " tram" : ""}" style="--c:${color(r.code)}">${codeChip(r.code)}${badge}${tram ? tramSvg(k) : ""}
         <div class="nm">${m.name}</div>
         <div class="meta"><span class="t">${note ? "⚠ " + note : m.teacher}</span>${room ? `<span>·</span><span>sala ${room}</span>` : ""}<span>·</span><span>${n} ${plural(n, "blok", "bloki", "bloków")} · ${hrs(n)} godz.</span></div></div></div>`;
   });
@@ -247,7 +371,7 @@ function weekend(i, opts = {}) {
 /* --- pages --- */
 function pageHome() {
   const n = nearest();
-  return weekend(n.i, { hero: hero(n.i, n.past, "Najbliższy zjazd") });
+  return weekend(n.i, { hero: hero(n.i, n.past, "Najbliższy zjazd", true) });
 }
 function pageAll() {
   if (state.open != null) {
@@ -255,14 +379,27 @@ function pageAll() {
     return `<button class="back" data-back>← Wszystkie zjazdy</button>` +
       (weekHasData(w) ? weekend(i, { hero: hero(i, wlast(w) < TODAY, "Zjazd") }) : `<div class="free">Plan na ten zjazd nie jest jeszcze dostępny.</div>`);
   }
-  let h = `<div class="sec">Wszystkie zjazdy</div><div class="list">`;
-  WEEKENDS.forEach((w, i) => {
-    if (!isZjazd(w)) return;
-    const st = weekStatus(i), codes = [...new Set(Object.values(w.days).flat().filter(Boolean))];
-    h += `<button class="wk ${st.k === "none" ? "off" : ""}" data-open="${i}"><div class="r"><div><b>Tydzień ${w.week}</b><div class="d">${rangeLabel(w)}</div></div><span class="st ${st.k}">${st.t}</span></div>
+  const items = WEEKENDS.map((w, i) => ({ w, i, st: weekStatus(i) })).filter(x => isZjazd(x.w));
+  const card = ({ w, i, st }) => {
+    const codes = [...new Set(Object.values(w.days).flat().filter(Boolean))];
+    const hot = st.k === "now" || st.k === "next";
+    let when = "";
+    if (st.k === "now") when = "Dziś";
+    else if (st.k === "next") { const n = diffDays(wfirst(w), TODAY); when = n === 1 ? "Jutro" : `Za ${n} ${plural(n, "dzień", "dni", "dni")}`; }
+    return `<button class="wk ${st.k}${hot ? " hot" : ""}" data-open="${i}"><div class="r"><div><b>Tydzień ${w.week}</b><div class="d">${rangeLabel(w)}</div></div>
+      <div class="rt">${when ? `<span class="when2">${when}</span>` : ""}<span class="st ${st.k}">${st.t}</span></div></div>
       ${codes.length ? `<div class="mods-row">${codes.map(codeChip).join("")}</div>` : ""}</button>`;
+  };
+  const groups = [
+    ["Teraz i najbliższy", items.filter(x => x.st.k === "now" || x.st.k === "next")],
+    ["Nadchodzące", items.filter(x => x.st.k === "later")],
+    ["Minione", items.filter(x => x.st.k === "done")],
+  ];
+  let h = `<div class="sec">Zjazdy</div>`;
+  groups.forEach(([title, list]) => {
+    if (list.length) h += `<div class="grp">${title}</div><div class="list">${list.map(card).join("")}</div>`;
   });
-  return h + `</div>`;
+  return h;
 }
 function pageMods() {
   const past = {}, next = {}, dates = {};
@@ -307,6 +444,155 @@ document.addEventListener("click", e => {
   else return;
   render();
 });
+
+/* ---------- easter egg: tramwaj przy zajęciach Le. Dę. ---------- */
+const TRAMS = [];
+const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CRUISE_TALK = ["Stuku-puku, stuku-puku…", "Tram-tram!", "Dzyń dzyń!", "Następny przystanek: Prawo Ohma", "Uwaga: prąd! ⚡", "Proszę nie opierać się o drzwi", "Czy ktoś widział mój bilet?", "Bzzzzz…", "Prąd zmienny, ale ja jadę prosto", "Dziki mają dziś wolne od torów", "Przepraszamy za utrudnienia"];
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+function initTrams() {
+  TRAMS.splice(0).forEach(t => t.stop());
+  document.querySelectorAll(".card.tram").forEach((card, n) => TRAMS.push(startTram(card, n)));
+}
+
+function startTram(card, n) {
+  const track = card.querySelector(".tramtrack"), tram = card.querySelector(".tramico"), svg = tram.querySelector("svg");
+  const stopEl = card.querySelector(".tramstop"), duck = card.querySelector(".obst"), spark = card.querySelector(".spark");
+  const bub = document.createElement("div"); bub.className = "tbubble"; card.appendChild(bub);
+  const TW = 84, MAXV = 75, ACC = 70, DEC = 95, DUCKV = 24, STOPW = 130;
+  let W = track.clientWidth, x = -TW, dir = n % 2 ? -1 : 1, v = 0, vmax = MAXV, state = "idle", wait = rnd(0.2, 1.2) + n * 0.5;
+  let kind = "stop", stopX = 0, stopShown = false, stopped = false, dwell = 0, stage = 0;
+  let duckX = 0, duckOn = false, duckT = -1, blackX = 0, blackDone = false, darkT = 0;
+  let talk = rnd(2, 5), bubT = 0, last = performance.now(), alive = true, visible = true, raf = 0;
+
+  const say = (text, ms = 1900) => { bub.textContent = text; bub.classList.add("show"); bubT = ms / 1000; place(); };
+  function place() {
+    const mid = track.offsetLeft + x + TW / 2, w = bub.offsetWidth, cw = card.clientWidth;
+    const left = Math.min(Math.max(mid, w / 2 + 8), cw - w / 2 - 8);
+    bub.style.left = left + "px";
+    bub.style.setProperty("--tx", Math.max(-w / 2 + 14, Math.min(w / 2 - 14, mid - left)) + "px");
+  }
+  function draw() {
+    const bob = v > 5 ? Math.sin(performance.now() / 55) * 0.6 : 0;
+    tram.style.transform = `translate(${x}px, ${bob}px)`;
+    svg.style.transform = `scaleX(${dir})`;
+    if (duckOn) duck.style.transform = `translateX(${duckX}px) scaleX(${-dir})`;
+    if (spark.classList.contains("on")) spark.style.transform = `translateX(${x + TW / 2 - 6}px)`;
+  }
+  function reset() {
+    stopEl.classList.remove("show", "boarding"); stopShown = false;
+    duck.classList.remove("on", "jump"); duckOn = false; duckT = -1;
+    spark.classList.remove("on"); tram.classList.remove("open", "dark");
+    bub.classList.remove("show");
+  }
+  function launch() {
+    reset();
+    dir = -dir; x = dir > 0 ? -TW : W; v = 0; vmax = MAXV; stopped = false; blackDone = false;
+    const r = Math.random();
+    kind = r < 0.55 ? "stop" : r < 0.7 ? "duck" : r < 0.85 ? "blackout" : "rush";
+    const center = rnd(W * 0.38, W * 0.62);
+    if (kind === "stop") {
+      stopX = center - TW / 2;
+      stopEl.style.transform = ""; stopEl.style.left = (center - STOPW / 2) + "px";
+    }
+    if (kind === "duck") {
+      duckX = dir > 0 ? rnd(W * 0.3, W * 0.45) : rnd(W * 0.55, W * 0.7); duckOn = true; duckT = -1;
+      duck.classList.add("on");
+    }
+    if (kind === "blackout") blackX = center - TW / 2;
+    if (kind === "rush") { vmax = MAXV * 1.7; setTimeout(() => alive && state === "go" && say("Spóźniony na zajęcia! Pędzę!", 1800), 500); }
+    state = "go";
+  }
+  function step(dt) {
+    W = track.clientWidth;
+    if (bubT > 0) { bubT -= dt; if (bubT <= 0) bub.classList.remove("show"); else place(); }
+
+    if (state === "idle") { wait -= dt; if (wait <= 0) launch(); }
+
+    else if (state === "go") {
+      let cap = vmax;
+      // przystanek wyłania się, gdy tramwaj jest blisko
+      if (kind === "stop") {
+        const ahead = (stopX - x) * dir;
+        if (!stopShown && ahead < 230) { stopShown = true; stopEl.classList.add("show"); }
+        if (!stopped && ahead > 0 && (v * v) / (2 * DEC) >= ahead - 1) state = "brake";
+        if (stopped && Math.abs(x - stopX) > TW + 20 && stopShown) { stopShown = false; stopEl.classList.remove("show", "boarding"); }
+      }
+      // dzik na torach: idzie przed tramwajem, tramwaj się za nim wlecze
+      if (kind === "duck" && duckOn) {
+        duckX += dir * DUCKV * dt;
+        const front = dir > 0 ? x + TW : x, gap = (duckX - front) * dir;
+        if (gap < 80) {
+          if (duckT < 0) { duckT = 3.4; say("Dzyń dzyń! Dzik na torach!", 1900); }
+          duckT -= dt;
+          cap = gap < 28 ? 0 : 22;
+          if (duckT <= 0) { duck.classList.add("jump"); duckOn = false; kindDone(); say("Pan dzik przepuścił. Jedziemy!", 1500); }
+        }
+        if (duckX < -20 || duckX > W + 20) { duck.classList.remove("on"); duckOn = false; }
+      }
+      // blackout: zanik napięcia w sieci
+      if (kind === "blackout" && !blackDone && (x - blackX) * dir >= 0) {
+        blackDone = true; state = "dark"; darkT = 2.9; say("Bzzzt! Zanik napięcia…", 1600);
+      }
+      if (state === "go") {
+        if (v > cap) v = Math.max(cap, v - DEC * dt); else v = Math.min(cap, v + ACC * dt);
+        x += dir * v * dt;
+        talk -= dt;
+        if (talk <= 0 && v > 40 && !bub.classList.contains("show")) { say(pick(CRUISE_TALK)); talk = rnd(3, 5.5); }
+        if ((dir > 0 && x > W) || (dir < 0 && x < -TW)) { reset(); state = "idle"; wait = rnd(1.2, 3); v = 0; }
+      }
+    }
+
+    else if (state === "brake") {
+      v = Math.max(0, v - DEC * dt); x += dir * v * dt;
+      if (v <= 2 || (stopX - x) * dir <= 0) {
+        v = 0; state = "dwell"; dwell = 3.4; stage = 0; stopped = true; say("Ding ding! Przystanek", 1600);
+      }
+    }
+
+    else if (state === "dwell") {
+      dwell -= dt;
+      if (stage === 0 && dwell < 2.4) { stage = 1; tram.classList.add("open"); stopEl.classList.add("boarding"); say("Psssz… drzwi otwarte", 1400); }
+      if (stage === 1 && dwell < 0.9) { stage = 2; tram.classList.remove("open"); say("Drzwi się zamykają! Ding!", 900); }
+      if (dwell <= 0) { state = "go"; v = 0; }
+    }
+
+    else if (state === "dark") {
+      darkT -= dt;
+      v = Math.max(0, v - DEC * 0.6 * dt); x += dir * v * dt;
+      const flick = Math.floor(darkT * 9) % 2 === 0;
+      tram.classList.toggle("dark", flick);
+      spark.classList.toggle("on", Math.floor(darkT * 14) % 3 !== 0);
+      if (darkT <= 0) {
+        tram.classList.remove("dark"); spark.classList.remove("on");
+        say("Jest prąd! Jedziemy!", 1400); state = "go"; v = 0;
+      }
+    }
+    draw();
+  }
+  function kindDone() { kind = "free"; }
+  function tick(now) {
+    if (!alive || !track.isConnected) { stop(); return; }
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (visible && !document.hidden) step(dt);
+    raf = requestAnimationFrame(tick);
+  }
+  function stop() { alive = false; cancelAnimationFrame(raf); io.disconnect(); }
+
+  const io = new IntersectionObserver(e => { visible = e[0].isIntersecting; }); io.observe(card);
+  tram.addEventListener("click", () => {
+    say("DING DING!", 1300);
+    tram.classList.remove("hop"); void tram.offsetWidth; tram.classList.add("hop");
+  });
+  if (REDUCED) { x = W - TW - 6; tram.style.transform = "none"; return { stop }; }
+  draw(); raf = requestAnimationFrame(tick);
+  return { stop };
+}
+
+const _renderBase = render;
+render = function () { _renderBase(); initTrams(); };
 
 $("#today").textContent = `Dziś: ${dow(TODAY)}, ${dnum(TODAY)} ${mon(TODAY)}`;
 render();

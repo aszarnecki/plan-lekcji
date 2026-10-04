@@ -26,6 +26,7 @@ jobs:
           node-version: 22
       - name: Pobierz plan (edupage + cku.home.pl)
         id: scrape
+        if: github.event_name != 'push'   # push tylko wdraża stronę — źródeł nie odpytujemy
         continue-on-error: true   # gdy źródła nie odpowiadają, publikujemy ostatni zapisany plan
         run: node scrape.js
       - name: Ostrzeżenie o nieudanym pobieraniu
