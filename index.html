@@ -91,7 +91,9 @@
   .mod { background:var(--surface); border:1px solid var(--line); border-radius:22px; padding:16px; box-shadow:var(--shadow); }
   .mod h3 { margin:10px 0 2px; font-size:15px; font-weight:700; line-height:1.3; }
   .bar { height:8px; background:var(--soft); border-radius:99px; overflow:hidden; margin:12px 0 6px; }
-  .bar i { display:block; height:100%; background:var(--c); border-radius:99px; }
+  .bar { display:flex; }
+  .bar i { display:block; height:100%; background:var(--c); }
+  .bar i.f { opacity:.35; }
   .sm { font-size:12.5px; color:var(--muted); font-weight:500; }
   .foot { text-align:center; color:var(--muted); font-size:12px; margin:28px 0 0; }
   .sec { margin:6px 2px 14px; font-size:20px; font-weight:800; letter-spacing:-.03em; }
@@ -256,16 +258,21 @@ function pageAll() {
   return h + `</div>`;
 }
 function pageMods() {
-  const used = {}, dates = {};
+  const past = {}, next = {}, dates = {};
   WEEKENDS.forEach(w => Object.entries(w.days).forEach(([d, arr]) => arr.forEach(c => {
-    if (!c) return; used[c] = (used[c] || 0) + 1; (dates[c] = dates[c] || new Set()).add(d);
+    if (!c) return;
+    const bucket = d < TODAY ? past : next;
+    bucket[c] = (bucket[c] || 0) + 1;
+    (dates[c] = dates[c] || new Set()).add(d);
   })));
   let h = `<div class="sec">Moduły</div><div class="mods">`;
   Object.entries(MODULES).forEach(([c, m]) => {
-    const done = (used[c] || 0) * 1.5, pct = Math.min(100, done / m.hours * 100);
+    const dn = hrs(past[c] || 0), pl = hrs(next[c] || 0);
+    const p1 = Math.min(100, dn / m.hours * 100), p2 = Math.min(100 - p1, pl / m.hours * 100);
     h += `<div class="mod" style="--c:${color(c)}">${codeChip(c)} <span class="sm">&nbsp;${m.teacher}</span><h3>${m.name}</h3>
-      <div class="bar"><i style="width:${pct}%"></i></div>
-      <div class="sm">${hrs(used[c] || 0)} z ${m.hours} godz. zaplanowane${dates[c] ? " · " + [...dates[c]].map(d => dnum(d) + "." + d.slice(5,7)).join(", ") : ""}</div></div>`;
+      <div class="bar"><i style="width:${p1}%"></i><i class="f" style="width:${p2}%"></i></div>
+      <div class="sm">${dn + pl} z ${m.hours} godz. w planie · odbyte ${dn}, przed tobą ${pl}</div>
+      <div class="sm">${dates[c] ? [...dates[c]].map(d => dnum(d) + "." + d.slice(5,7)).join(", ") : "brak terminów w planie"}</div></div>`;
   });
   return h + `</div>`;
 }
