@@ -44,6 +44,12 @@ jobs:
           mkdir _site
           cp index.html data.js schedule.js schedule.json manifest.webmanifest sw.js _site/
           cp -r icons _site/icons
+          # czas ostatniego udanego sprawdzenia źródeł; przy pushu / awarii zachowujemy poprzednią wartość z działającej strony
+          if [ "${{ steps.scrape.outcome }}" = "success" ]; then
+            echo "window.CHECKED_AT = \"$(date -u +%FT%TZ)\";" > _site/checked.js
+          else
+            curl -sf https://aszarnecki.github.io/plan-lekcji/checked.js -o _site/checked.js || echo "window.CHECKED_AT = null;" > _site/checked.js
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

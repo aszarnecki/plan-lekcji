@@ -219,6 +219,7 @@
 
 <script src="data.js"></script>
 <script src="schedule.js"></script>
+<script src="checked.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const pad = n => String(n).padStart(2, "0");
@@ -429,10 +430,16 @@ const ICONS = {
 const TABS = [["home", "Najbliższy zjazd"], ["all", "Zjazdy"], ["mods", "Moduły"]];
 const state = { tab: "home", open: null, day: null, dayFor: null };
 
+const fmtTime = iso => new Date(iso).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
+function footer() {
+  if (!window.SCHEDULE_META) return "";
+  const checked = window.CHECKED_AT ? `sprawdzono ${fmtTime(CHECKED_AT)} · ` : "";
+  return `<p class="foot">Dane: edupage + cku.home.pl · klasa ${SCHEDULE_META.className}<br>${checked}ostatnia zmiana planu ${fmtTime(SCHEDULE_META.generatedAt)}</p>`;
+}
 function render() {
   $("#nav").innerHTML = TABS.map(([k, t]) => `<button data-tab="${k}" class="${state.tab === k ? "on" : ""}">${ICONS[k]}${t}</button>`).join("");
   $("#app").innerHTML = { home: pageHome, all: pageAll, mods: pageMods }[state.tab]() +
-    (window.SCHEDULE_META ? `<p class="foot">Dane: edupage + cku.home.pl · klasa ${SCHEDULE_META.className} · zaktualizowano ${new Date(SCHEDULE_META.generatedAt).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" })}</p>` : "");
+    footer();
 }
 
 document.addEventListener("click", e => {
