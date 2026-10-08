@@ -46,8 +46,11 @@ async function fetchEdupage() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: "00000000" }),
   });
-  if (!res.ok) throw new Error("edupage HTTP " + res.status);
-  const j = await res.json();
+  const body = await res.text();
+  if (!res.ok) throw new Error(`edupage HTTP ${res.status} ${res.headers.get("server") || ""} ${body.slice(0, 160).replace(/s+/g, " ")}`);
+  let j;
+  try { j = JSON.parse(body); }
+  catch { throw new Error(`edupage zwróciło nie-JSON (${res.headers.get("content-type")}): ${body.slice(0, 160).replace(/s+/g, " ")}`); }
   const T = {};
   j.r.dbiAccessorRes.tables.forEach(t => (T[t.id] = t.data_rows));
   return T;
@@ -186,12 +189,23 @@ const sameDay = (a = [], b = []) => JSON.stringify(a.length ? a : []) === JSON.s
 const compact = a => (a.every(x => !x) ? [] : a);
 
 (async () => {
-  log("edupage…");
-  const weeks = buildFromEdupage(await fetchEdupage());
-  log(`  ${weeks.length} zjazdów w planie bazowym`);
-
+  log(`start ${new Date().toISOString()} (node ${process.version})`);
   let oldWeeks = [];
   try { oldWeeks = JSON.parse(fs.readFileSync(path.join(__dirname, "schedule.json"), "utf8")).weekends; } catch {}
+
+  log("edupage…");
+  let weeks, eduFailed = false;
+  try {
+    weeks = buildFromEdupage(await fetchEdupage());
+    log(`  ${weeks.length} zjazdów w planie bazowym`);
+  } catch (e) {
+    // edupage nieosiągalne (np. blokada adresów GitHuba) — jedziemy dalej na poprzednim planie bazowym
+    log("  ! edupage niedostępne:", e.message);
+    if (!oldWeeks.length) throw e;
+    eduFailed = true;
+    weeks = JSON.parse(JSON.stringify(oldWeeks));
+    log(`  … używam poprzednich danych (${weeks.length} zjazdów)`);
+  }
   log("cku.home.pl…");
   for (const w of weeks) {
     let r;
@@ -259,4 +273,5 @@ const compact = a => (a.every(x => !x) ? [] : a);
   fs.writeFileSync(path.join(__dirname, "schedule.js"),
     `// Plik generowany przez scrape.js — nie edytuj ręcznie.\nwindow.SCHEDULE_META = ${JSON.stringify(meta)};\nwindow.WEEKENDS = ${JSON.stringify(weeks, null, 1)};\n`);
   log(`Zapisano schedule.js / schedule.json (${weeks.length} zjazdów).`);
+  if (eduFailed) { log("UWAGA: edupage było niedostępne — dane częściowo z poprzedniego pobrania."); process.exitCode = 2; }
 })().catch(e => { console.error("BŁĄD:", e.message); process.exit(1); });

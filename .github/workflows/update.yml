@@ -28,7 +28,9 @@ jobs:
         id: scrape
         if: github.event_name != 'push'   # push tylko wdraża stronę — źródeł nie odpytujemy
         continue-on-error: true   # gdy źródła nie odpowiadają, publikujemy ostatni zapisany plan
-        run: node scrape.js
+        run: |
+          set -o pipefail
+          node scrape.js 2>&1 | tee scrape.log
       - name: Ostrzeżenie o nieudanym pobieraniu
         if: steps.scrape.outcome == 'failure'
         run: echo "::warning::Nie udało się pobrać planu — opublikowano ostatnie zapisane dane."
@@ -44,6 +46,7 @@ jobs:
           mkdir _site
           cp index.html data.js schedule.js schedule.json manifest.webmanifest sw.js _site/
           cp -r icons _site/icons
+          cp scrape.log _site/scrape.log 2>/dev/null || echo "brak logu (scraper nie uruchamiany)" > _site/scrape.log
           # czas ostatniego udanego sprawdzenia źródeł; przy pushu / awarii zachowujemy poprzednią wartość z działającej strony
           if [ "${{ steps.scrape.outcome }}" = "success" ]; then
             echo "window.CHECKED_AT = \"$(date -u +%FT%TZ)\";" > _site/checked.js
