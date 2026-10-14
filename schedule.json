@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-10-04T16:55:26.408Z",
+    "generatedAt": "2026-10-14T11:46:18.011Z",
     "classId": "*10",
     "className": "ELE.02B"
   },
@@ -266,9 +266,44 @@
           null
         ]
       },
-      "rooms": {},
-      "notes": {},
-      "source": "edupage",
+      "rooms": {
+        "2026-10-17": [
+          "131",
+          "131",
+          "131",
+          "131",
+          "131",
+          null
+        ],
+        "2026-10-18": [
+          "131",
+          "131",
+          "131",
+          "131",
+          "131",
+          null
+        ]
+      },
+      "notes": {
+        "2026-10-17": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "2026-10-18": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "source": "cku",
+      "ckuUrl": "https://cku.home.pl/plan_kkz/plan_17_18_10.htm",
       "zjazd": true
     },
     {

@@ -1,5 +1,5 @@
 // Plik generowany przez scrape.js — nie edytuj ręcznie.
-window.SCHEDULE_META = {"generatedAt":"2026-10-04T16:55:26.408Z","classId":"*10","className":"ELE.02B"};
+window.SCHEDULE_META = {"generatedAt":"2026-10-14T11:46:18.011Z","classId":"*10","className":"ELE.02B"};
 window.WEEKENDS = [
  {
   "week": 36,
@@ -262,9 +262,44 @@ window.WEEKENDS = [
     null
    ]
   },
-  "rooms": {},
-  "notes": {},
-  "source": "edupage",
+  "rooms": {
+   "2026-10-17": [
+    "131",
+    "131",
+    "131",
+    "131",
+    "131",
+    null
+   ],
+   "2026-10-18": [
+    "131",
+    "131",
+    "131",
+    "131",
+    "131",
+    null
+   ]
+  },
+  "notes": {
+   "2026-10-17": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "2026-10-18": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  "source": "cku",
+  "ckuUrl": "https://cku.home.pl/plan_kkz/plan_17_18_10.htm",
   "zjazd": true
  },
  {
