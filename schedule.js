@@ -1,5 +1,5 @@
 // Plik generowany przez scrape.js — nie edytuj ręcznie.
-window.SCHEDULE_META = {"generatedAt":"2026-10-14T11:46:18.011Z","classId":"*10","className":"ELE.02B"};
+window.SCHEDULE_META = {"generatedAt":"2026-10-15T16:56:23.348Z","classId":"*10","className":"ELE.02B"};
 window.WEEKENDS = [
  {
   "week": 36,
@@ -421,9 +421,9 @@ window.WEEKENDS = [
     null
    ],
    "2026-12-06": [
-    "K2.01",
-    "K2.01",
-    "K2.01",
+    "K1.01",
+    "K1.01",
+    "K1.01",
     "K2.01",
     "K2.01",
     null
@@ -460,14 +460,14 @@ window.WEEKENDS = [
     "W1.01",
     "W1.01",
     "W1.01",
-    "K2.01",
-    "K2.01",
+    "K1.01",
+    "K1.01",
     null
    ],
    "2026-12-20": [
-    "K2.01",
-    "K2.01",
-    "K2.01",
+    "W1.01",
+    "W1.01",
+    "W1.01",
     "K1.02",
     "K1.02",
     null
