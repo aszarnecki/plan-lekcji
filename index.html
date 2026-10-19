@@ -207,6 +207,24 @@
   .tbubble.show { opacity:1; transform:translateX(-50%) scale(1); }
   .tbubble::after { content:""; position:absolute; left:calc(50% + var(--tx, 0px)); bottom:-4px; width:9px; height:9px; background:#fff; transform:translateX(-50%) rotate(45deg); border-radius:2px; }
   @media (prefers-reduced-motion: reduce) { .tramico { left:auto; right:6px; transform:none !important; } .tramstop { display:none; } }
+
+  /* rozwijane przerwy w obrębie przedmiotu */
+  .seams { margin:10px 0 4px; }
+  .seams div { padding:3px 0 3px 12px; font-variant-numeric:tabular-nums; }
+  .seams .sb { border-left:3px solid var(--c); font-size:13px; font-weight:700; }
+  .seams .sg { border-left:3px dotted color-mix(in srgb, var(--text) 35%, transparent); font-size:11.5px; color:var(--muted); padding-top:2px; padding-bottom:2px; }
+  .more { margin-top:10px; display:inline-flex; align-items:center; gap:8px; border:1px solid color-mix(in srgb, var(--text) 25%, transparent); background:rgba(255,255,255,.06); border-radius:99px; padding:6px 12px; font-weight:700; font-size:12.5px; color:var(--text); }
+  .more svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .25s; }
+  .run.open .more svg { transform:rotate(180deg); }
+  .pan { display:grid; grid-template-rows:0fr; transition:grid-template-rows .28s ease; }
+  .pan > div { overflow:hidden; }
+  .run.open .pan { grid-template-rows:1fr; }
+  @media (prefers-reduced-motion: reduce) { .pan, .more svg { transition:none; } }
+  /* filtr modułów po nauczycielach */
+  .tchips { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 14px; }
+  .tchip { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); background:var(--surface); color:var(--text); border-radius:99px; padding:7px 13px; font-weight:700; font-size:13px; }
+  .tchip[style]::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--c); }
+  .tchip.on { background:var(--text); color:var(--bg); border-color:var(--text); }
 </style>
 </head>
 <body>
@@ -335,6 +353,20 @@ function hero(i, past, label, fallback = false) {
     <div class="mods-row">${codes.map(codeChip).join("")}</div></section>`;
 }
 
+// rozwijana lista bloków z przerwami (dla zajęć scalonych z kilku bloków)
+const CHEV = '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>';
+function breakPanel(r, key, open) {
+  if (r.to === r.from) return "";
+  const g = r.to - r.from;
+  let rows = "";
+  for (let b = r.from; b <= r.to; b++) {
+    rows += `<div class="sb">${BLOCKS[b].start}–${BLOCKS[b].end}</div>`;
+    if (b < r.to) rows += `<div class="sg">przerwa ${mins(BLOCKS[b + 1].start) - mins(BLOCKS[b].end)} min</div>`;
+  }
+  return `<button class="more" data-more="${key}" aria-expanded="${open}">${r.to - r.from + 1} ${plural(r.to - r.from + 1, "blok", "bloki", "bloków")}, ${g} ${plural(g, "przerwa", "przerwy", "przerw")}${CHEV}</button>` +
+    `<div class="pan"><div><div class="seams">${rows}</div></div></div>`;
+}
+
 function dayCard(iso, arr, sel, w) {
   const rs = runs(arr), isToday = iso === TODAY;
   let h = `<article class="day ${isToday ? "is-today" : ""} ${sel ? "sel" : ""}"><div class="dh"><h2>${dow(iso)}<small>${dnum(iso)} ${mon(iso)}</small></h2>`;
@@ -352,10 +384,11 @@ function dayCard(iso, arr, sel, w) {
     const tram = isTram(r.code);
     const live = isToday && mins(s) <= NOWMIN && NOWMIN < mins(e);
     const badge = live ? `<span class="badge">trwa</span>` : (k === nextIdx ? `<span class="badge">następne</span>` : "");
-    h += `<div class="run"><div class="tm">${s}<span>${e}</span></div>
+    const key = `${iso}|${r.from}`, open = state.exp.has(key);
+    h += `<div class="run${open ? " open" : ""}"><div class="tm">${s}<span>${e}</span></div>
       <div class="card ${live ? "live" : ""}${tram ? " tram" : ""}" style="--c:${color(r.code)}">${codeChip(r.code)}${badge}${tram ? tramSvg(k) : ""}
         <div class="nm">${m.name}</div>
-        <div class="meta"><span class="t">${note ? "⚠ " + note : m.teacher}</span>${room ? `<span>·</span><span>sala ${room}</span>` : ""}<span>·</span><span>${n} ${plural(n, "blok", "bloki", "bloków")} · ${hrs(n)} godz.</span></div></div></div>`;
+        <div class="meta"><span class="t">${note ? "⚠ " + note : m.teacher}</span>${room ? `<span>·</span><span>sala ${room}</span>` : ""}<span>·</span><span>${n} ${plural(n, "blok", "bloki", "bloków")} · ${hrs(n)} godz.</span></div>${breakPanel(r, key, open)}</div></div>`;
   });
   return h + `</article>`;
 }
@@ -410,8 +443,12 @@ function pageMods() {
     bucket[c] = (bucket[c] || 0) + 1;
     (dates[c] = dates[c] || new Set()).add(d);
   })));
-  let h = `<div class="sec">Moduły</div><div class="mods">`;
-  Object.entries(MODULES).forEach(([c, m]) => {
+  const teachers = [...new Set(Object.values(MODULES).map(m => m.teacher))];
+  let h = `<div class="sec">Moduły</div><div class="tchips">` +
+    [["", "Wszyscy"], ...teachers.map(t => [t, t])].map(([t, label]) =>
+      `<button class="tchip${state.teacher === t ? " on" : ""}" data-teacher="${t}" ${t ? `style="--c:${TEACHERS[t]}"` : ""}>${label}</button>`).join("") +
+    `</div><div class="mods">`;
+  Object.entries(MODULES).filter(([, m]) => !state.teacher || m.teacher === state.teacher).forEach(([c, m]) => {
     const dn = hrs(past[c] || 0), pl = hrs(next[c] || 0);
     const p1 = Math.min(100, dn / m.hours * 100), p2 = Math.min(100 - p1, pl / m.hours * 100);
     h += `<div class="mod" style="--c:${color(c)}">${codeChip(c)} <span class="sm">&nbsp;${m.teacher}</span><h3>${m.name}</h3>
@@ -428,7 +465,7 @@ const ICONS = {
   mods: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg>',
 };
 const TABS = [["home", "Najbliższy zjazd"], ["all", "Zjazdy"], ["mods", "Moduły"]];
-const state = { tab: "home", open: null, day: null, dayFor: null };
+const state = { tab: "home", open: null, day: null, dayFor: null, teacher: "", exp: new Set() };
 
 const fmtTime = iso => new Date(iso).toLocaleString("pl-PL", { dateStyle: "short", timeStyle: "short" });
 function footer() {
@@ -443,8 +480,16 @@ function render() {
 }
 
 document.addEventListener("click", e => {
-  const t = e.target.closest("[data-tab]"), d = e.target.closest("[data-day]"), o = e.target.closest("[data-open]"), b = e.target.closest("[data-back]");
-  if (t) { state.tab = t.dataset.tab; state.open = null; window.scrollTo(0, 0); }
+  const mo = e.target.closest("[data-more]");
+  if (mo) {
+    const open = mo.closest(".run").classList.toggle("open");
+    mo.setAttribute("aria-expanded", open);
+    open ? state.exp.add(mo.dataset.more) : state.exp.delete(mo.dataset.more);
+    return;
+  }
+  const th = e.target.closest("[data-teacher]"), t = e.target.closest("[data-tab]"), d = e.target.closest("[data-day]"), o = e.target.closest("[data-open]"), b = e.target.closest("[data-back]");
+  if (th) state.teacher = th.dataset.teacher;
+  else if (t) { state.tab = t.dataset.tab; state.open = null; window.scrollTo(0, 0); }
   else if (d) state.day = +d.dataset.day;
   else if (o) { state.open = +o.dataset.open; window.scrollTo(0, 0); }
   else if (b) state.open = null;
