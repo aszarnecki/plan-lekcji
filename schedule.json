@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-11-07T07:56:37.865Z",
+    "generatedAt": "2026-11-07T08:22:44.539Z",
     "classId": "*10",
     "className": "ELE.02B"
   },
@@ -382,8 +382,8 @@
         ]
       },
       "source": "cku",
-      "zjazd": true,
-      "ckuUrl": "https://cku.home.pl/plan_kkz/plan_07_08_11.htm"
+      "ckuUrl": "https://cku.home.pl/plan_kkz/plan_07_08_11.htm",
+      "zjazd": true
     },
     {
       "week": 46,
@@ -583,8 +583,22 @@
         "2027-01-24"
       ],
       "days": {
-        "2027-01-23": [],
-        "2027-01-24": []
+        "2027-01-23": [
+          "W1.01",
+          "W1.01",
+          "P1.04",
+          "K1.01",
+          "K1.01",
+          null
+        ],
+        "2027-01-24": [
+          "K1.01",
+          "K1.01",
+          "K1.01",
+          "K1.02",
+          "K1.02",
+          null
+        ]
       },
       "rooms": {},
       "notes": {},

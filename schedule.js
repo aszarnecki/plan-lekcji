@@ -1,5 +1,5 @@
 // Plik generowany przez scrape.js — nie edytuj ręcznie.
-window.SCHEDULE_META = {"generatedAt":"2026-11-07T07:56:37.865Z","classId":"*10","className":"ELE.02B"};
+window.SCHEDULE_META = {"generatedAt":"2026-11-07T08:22:44.539Z","classId":"*10","className":"ELE.02B"};
 window.WEEKENDS = [
  {
   "week": 36,
@@ -378,8 +378,8 @@ window.WEEKENDS = [
    ]
   },
   "source": "cku",
-  "zjazd": true,
-  "ckuUrl": "https://cku.home.pl/plan_kkz/plan_07_08_11.htm"
+  "ckuUrl": "https://cku.home.pl/plan_kkz/plan_07_08_11.htm",
+  "zjazd": true
  },
  {
   "week": 46,
@@ -579,8 +579,22 @@ window.WEEKENDS = [
    "2027-01-24"
   ],
   "days": {
-   "2027-01-23": [],
-   "2027-01-24": []
+   "2027-01-23": [
+    "W1.01",
+    "W1.01",
+    "P1.04",
+    "K1.01",
+    "K1.01",
+    null
+   ],
+   "2027-01-24": [
+    "K1.01",
+    "K1.01",
+    "K1.01",
+    "K1.02",
+    "K1.02",
+    null
+   ]
   },
   "rooms": {},
   "notes": {},
