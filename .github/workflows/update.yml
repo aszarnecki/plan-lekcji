@@ -33,6 +33,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: IP runnera (do diagnozy blokady edupage)
+        if: github.event_name != 'push'
+        run: echo "Publiczne IP tej maszyny: $(curl -sS --max-time 10 https://api.ipify.org || echo 'nieznane')"
       - name: Pobierz plan (edupage + cku.home.pl)
         id: scrape
         if: github.event_name != 'push'   # push tylko wdraża stronę — źródeł nie odpytujemy
