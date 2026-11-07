@@ -56,8 +56,12 @@ async function edupageSession() {
     const m = /gsechash["']?\s*[:=]\s*["']([0-9a-fA-F]{6,})["']/.exec(html) || /["']gsh["']\s*:\s*["']([0-9a-fA-F]{6,})["']/.exec(html);
     if (m) out.gsh = m[1];
     // numery dostępnych planów (gdyby szkoła opublikowała nowszy niż CONFIG.eduTimetable)
-    const nums = [...new Set([...html.matchAll(/["']tt_num["']\s*:\s*["']?(\d+)/g)].map(x => x[1]))];
-    log(`  sesja edupage: HTTP ${res.status}, gsh ${m ? "ze strony" : "domyślny"}, ciasteczka ${out.cookie ? "są" : "brak"}${nums.length ? `, plany: ${nums.join(",")}` : ""}`);
+    const nums = [...new Set([...html.matchAll(/["']?tt_num["']?\s*[:=]\s*["']?(\d+)/g), ...html.matchAll(/[?&]num=(\d+)/g)].map(x => x[1]))];
+    log(`  sesja edupage: HTTP ${res.status}, gsh ${m ? "ze strony" : "domyślny"}, ciasteczka ${out.cookie ? "są" : "brak"}${nums.length ? `, numery planów na stronie: ${nums.join(",")}` : ", numerów planów nie znaleziono"}`);
+    if (process.env.EDU_DEBUG) {
+      const i = html.search(/gsechash|timetables|tt_num/i);
+      log("  [debug] fragment strony:", snippet(html.slice(Math.max(0, i - 100), i + 900)).slice(0, 1000));
+    }
     if (!m && !/timetable/i.test(html)) log(`  ! strona planu wygląda nietypowo: ${snippet(html)}`);
   } catch (e) {
     log(`  ! nie udało się pobrać strony planu (${e.message}) — próbuję bez sesji`);
@@ -85,7 +89,8 @@ async function fetchEdupage(tries = 2) {
   if (!Array.isArray(tables)) {
     // Połączenie było, ale odpowiedź nie ma danych planu — logujemy co przyszło i próbujemy jeszcze raz.
     const keys = j?.r && typeof j.r === "object" ? Object.keys(j.r).join(",") : typeof j?.r;
-    log(`  ! edupage odpowiedziało bez tabel planu (r: ${keys}): ${snippet(body)}`);
+    const err = j?.r?.error ?? j?.error;
+    log(`  ! edupage odpowiedziało bez tabel planu (r: ${keys})${err !== undefined ? `, error: ${JSON.stringify(err).slice(0, 300)}` : ""}: ${snippet(body)}`);
     if (tries > 1) { await new Promise(r => setTimeout(r, 5000)); return fetchEdupage(tries - 1); }
     throw new Error("edupage: odpowiedź bez tabel planu (szczegóły wyżej)");
   }
