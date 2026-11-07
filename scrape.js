@@ -40,19 +40,28 @@ async function http(url, opts = {}, tries = 4) {
 }
 
 /* ---------------- edupage ---------------- */
-async function fetchEdupage() {
+const snippet = s => s.slice(0, 200).replace(/\s+/g, " ");
+
+async function fetchEdupage(tries = 2) {
   const res = await http(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: "00000000" }),
   });
   const body = await res.text();
-  if (!res.ok) throw new Error(`edupage HTTP ${res.status} ${res.headers.get("server") || ""} ${body.slice(0, 160).replace(/s+/g, " ")}`);
+  if (!res.ok) throw new Error(`edupage HTTP ${res.status} ${res.headers.get("server") || ""} ${snippet(body)}`);
   let j;
   try { j = JSON.parse(body); }
-  catch { throw new Error(`edupage zwróciło nie-JSON (${res.headers.get("content-type")}): ${body.slice(0, 160).replace(/s+/g, " ")}`); }
+  catch { throw new Error(`edupage zwróciło nie-JSON (${res.headers.get("content-type")}): ${snippet(body)}`); }
+  const tables = j?.r?.dbiAccessorRes?.tables;
+  if (!Array.isArray(tables)) {
+    // Połączenie było, ale odpowiedź nie ma danych planu (np. komunikat błędu edupage) — logujemy co przyszło i próbujemy jeszcze raz.
+    log(`  ! edupage odpowiedziało bez tabel planu: ${snippet(body)}`);
+    if (tries > 1) { await new Promise(r => setTimeout(r, 5000)); return fetchEdupage(tries - 1); }
+    throw new Error("edupage: odpowiedź bez tabel planu (szczegóły wyżej)");
+  }
   const T = {};
-  j.r.dbiAccessorRes.tables.forEach(t => (T[t.id] = t.data_rows));
+  tables.forEach(t => (T[t.id] = t.data_rows));
   return T;
 }
 
