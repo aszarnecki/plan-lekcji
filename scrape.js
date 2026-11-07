@@ -24,7 +24,8 @@ async function http(url, opts = {}, tries = 4) {
     try {
       const res = await fetch(url, {
         ...opts,
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; plan-lekcji-bot; +https://github.com/aszarnecki/plan-lekcji)", ...(opts.headers || {}) },
+        // zwykły przeglądarkowy UA — z identyfikatorem "bot" edupage ucinało połączenia z GitHub Actions
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36", "Accept-Language": "pl-PL,pl;q=0.9", ...(opts.headers || {}) },
         signal: AbortSignal.timeout(30000),
       });
       if (res.status >= 500 && i < tries) throw new Error("HTTP " + res.status);
@@ -45,7 +46,7 @@ const snippet = s => s.slice(0, 200).replace(/\s+/g, " ");
 async function fetchEdupage(tries = 2) {
   const res = await http(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": CONFIG.eduHost, "Referer": `${CONFIG.eduHost}/timetable/view.php?num=${CONFIG.eduTimetable}&class=${encodeURIComponent(CONFIG.classId)}` },
     body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: "00000000" }),
   });
   const body = await res.text();
