@@ -10,7 +10,7 @@ const CONFIG = {
   classId: process.env.CLASS_ID || "*10",        // klasa w edupage (class=*10)
   className: process.env.CLASS_NAME || "ELE.02B", // ta sama klasa w nagłówku tabelki cku
   eduHost: "https://ckziu1gda.edupage.org",
-  eduTimetable: "65",
+  eduTimetable: process.env.EDU_TT || "69", // numer planu w edupage; gdy przestanie być publiczny, pickTimetable() weźmie aktualny
   ckuBase: "https://cku.home.pl/plan_kkz/",
   harmonogram: "Harmonogram_KKZ_26_27_semestr_I.htm", // tabela: które weekendy są zjazdami dla danej klasy
 };
@@ -24,7 +24,7 @@ async function http(url, opts = {}, tries = 4) {
     try {
       const res = await fetch(url, {
         ...opts,
-        // zwykły przeglądarkowy UA — z identyfikatorem "bot" edupage ucinało połączenia z GitHub Actions
+        // zwykły przeglądarkowy UA (edupage bywa wybredne); ETIMEDOUT z GitHub Actions zależy od IP runnera, nie od nagłówków
         headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36", "Accept-Language": "pl-PL,pl;q=0.9", ...(opts.headers || {}) },
         signal: AbortSignal.timeout(30000),
       });
