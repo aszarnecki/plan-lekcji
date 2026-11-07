@@ -123,14 +123,16 @@ function parseCku(html, expected) {
   let hr = -1, hc = -1;
   g.forEach((row, r) => row.forEach((t, c) => { if (hr < 0 && t === CONFIG.className) { hr = r; hc = c; } }));
   if (hr < 0) return null;
+  // Kolumna sali: zwykle zaraz za klasą (hc+1), ale są układy, w których nagłówek "sala" stoi dalej (hc+2).
+  const roomOff = [1, 2].find(o => g.slice(hr, hr + 5).some(row => (row[hc + o] || "").toLowerCase() === "sala")) || 1;
   const res = { days: {}, rooms: {}, notes: {} };
   let date = null;
   for (let r = hr + 1; r < g.length; r++) {
     const row = g[r] || [];
     if (row.length && row.every(t => !t)) break; // pusty wiersz = koniec grupy klas
     if (row[0] === "Data") {
-      const m = /(\d\d)\.(\d\d)\.(\d{4})/.exec(row[hc] || "");
-      date = m ? expected.find(d => d.slice(5) === `${m[2]}-${m[1]}`) || null : null;
+      const m = /(\d{1,2})\.(\d{1,2})\.(\d{4})/.exec(row[hc] || ""); // cku pisze dni bez zera: "7.11.2026"
+      date = m ? expected.find(d => d.slice(5) === `${pad(m[2])}-${pad(m[1])}`) || null : null;
       if (date && m[3] !== date.slice(0, 4)) res.yearFixed = `${m[3]}→${date.slice(0, 4)}`;
       if (date) { res.days[date] = Array(6).fill(null); res.rooms[date] = Array(6).fill(null); res.notes[date] = Array(6).fill(null); }
     } else if (/^[1-6]\.$/.test(row[0] || "") && date) {
@@ -138,7 +140,7 @@ function parseCku(html, expected) {
       const m = /^([A-Z]\d\.\d\d)\s*(.*)$/.exec(cell);
       if (!m) continue;
       res.days[date][i] = m[1];
-      res.rooms[date][i] = row[hc + 2] || null;
+      res.rooms[date][i] = row[hc + roomOff] || null;
       if (/zast/i.test(m[2])) res.notes[date][i] = m[2];
     }
   }
