@@ -43,11 +43,38 @@ async function http(url, opts = {}, tries = 4) {
 /* ---------------- edupage ---------------- */
 const snippet = s => s.slice(0, 200).replace(/\s+/g, " ");
 
+// Strona planu zawiera hash sesji (gsechash) i ustawia ciasteczka; bez nich regularttGetData
+// odpowiada {"r":{"rights":{...false}}} zamiast danych. Pobieramy je jak przeglądarka.
+async function edupageSession() {
+  const viewUrl = `${CONFIG.eduHost}/timetable/view.php?num=${CONFIG.eduTimetable}&class=${encodeURIComponent(CONFIG.classId)}`;
+  const out = { viewUrl, gsh: "00000000", cookie: "" };
+  try {
+    const res = await http(viewUrl, { headers: { "Accept": "text/html,application/xhtml+xml,*/*;q=0.8" } });
+    const html = await res.text();
+    out.cookie = (typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : [])
+      .map(c => c.split(";")[0]).join("; ");
+    const m = /gsechash["']?\s*[:=]\s*["']([0-9a-fA-F]{6,})["']/.exec(html) || /["']gsh["']\s*:\s*["']([0-9a-fA-F]{6,})["']/.exec(html);
+    if (m) out.gsh = m[1];
+    // numery dostępnych planów (gdyby szkoła opublikowała nowszy niż CONFIG.eduTimetable)
+    const nums = [...new Set([...html.matchAll(/["']tt_num["']\s*:\s*["']?(\d+)/g)].map(x => x[1]))];
+    log(`  sesja edupage: HTTP ${res.status}, gsh ${m ? "ze strony" : "domyślny"}, ciasteczka ${out.cookie ? "są" : "brak"}${nums.length ? `, plany: ${nums.join(",")}` : ""}`);
+    if (!m && !/timetable/i.test(html)) log(`  ! strona planu wygląda nietypowo: ${snippet(html)}`);
+  } catch (e) {
+    log(`  ! nie udało się pobrać strony planu (${e.message}) — próbuję bez sesji`);
+  }
+  return out;
+}
+
 async function fetchEdupage(tries = 2) {
+  const s = await edupageSession();
   const res = await http(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "application/json, text/javascript, */*; q=0.01", "X-Requested-With": "XMLHttpRequest", "Origin": CONFIG.eduHost, "Referer": `${CONFIG.eduHost}/timetable/view.php?num=${CONFIG.eduTimetable}&class=${encodeURIComponent(CONFIG.classId)}` },
-    body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: "00000000" }),
+    headers: {
+      "Content-Type": "application/json", "Accept": "application/json, text/javascript, */*; q=0.01",
+      "X-Requested-With": "XMLHttpRequest", "Origin": CONFIG.eduHost, "Referer": s.viewUrl,
+      ...(s.cookie ? { "Cookie": s.cookie } : {}),
+    },
+    body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: s.gsh }),
   });
   const body = await res.text();
   if (!res.ok) throw new Error(`edupage HTTP ${res.status} ${res.headers.get("server") || ""} ${snippet(body)}`);
@@ -56,8 +83,9 @@ async function fetchEdupage(tries = 2) {
   catch { throw new Error(`edupage zwróciło nie-JSON (${res.headers.get("content-type")}): ${snippet(body)}`); }
   const tables = j?.r?.dbiAccessorRes?.tables;
   if (!Array.isArray(tables)) {
-    // Połączenie było, ale odpowiedź nie ma danych planu (np. komunikat błędu edupage) — logujemy co przyszło i próbujemy jeszcze raz.
-    log(`  ! edupage odpowiedziało bez tabel planu: ${snippet(body)}`);
+    // Połączenie było, ale odpowiedź nie ma danych planu — logujemy co przyszło i próbujemy jeszcze raz.
+    const keys = j?.r && typeof j.r === "object" ? Object.keys(j.r).join(",") : typeof j?.r;
+    log(`  ! edupage odpowiedziało bez tabel planu (r: ${keys}): ${snippet(body)}`);
     if (tries > 1) { await new Promise(r => setTimeout(r, 5000)); return fetchEdupage(tries - 1); }
     throw new Error("edupage: odpowiedź bez tabel planu (szczegóły wyżej)");
   }
