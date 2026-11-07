@@ -69,16 +69,43 @@ async function edupageSession() {
   return out;
 }
 
+const eduHeaders = s => ({
+  "Content-Type": "application/json", "Accept": "application/json, text/javascript, */*; q=0.01",
+  "X-Requested-With": "XMLHttpRequest", "Origin": CONFIG.eduHost, "Referer": s.viewUrl,
+  ...(s.cookie ? { "Cookie": s.cookie } : {}),
+});
+
+// Lista publicznych planów (jak w rozwijanej liście na stronie). Szkoła co jakiś czas publikuje nowy numer,
+// a stary przestaje być dostępny ("Brak uprawnień") — wybieramy więc aktualny zamiast sztywnego numeru.
+async function pickTimetable(s) {
+  const now = new Date();
+  const year = now.getMonth() + 1 >= 8 ? now.getFullYear() : now.getFullYear() - 1; // rok szkolny (turnover 08-01)
+  try {
+    const res = await http(`${CONFIG.eduHost}/timetable/server/ttviewer.js?__func=getTTViewerData`, {
+      method: "POST", headers: eduHeaders(s), body: JSON.stringify({ __args: [null, year], __gsh: s.gsh }),
+    });
+    const body = await res.text();
+    let j; try { j = JSON.parse(body); } catch { throw new Error(`nie-JSON: ${snippet(body)}`); }
+    const list = j?.r?.regular?.timetables;
+    if (!Array.isArray(list) || !list.length) throw new Error(`brak listy planów (r: ${j?.r && typeof j.r === "object" ? Object.keys(j.r).join(",") : snippet(body)})`);
+    log(`  publiczne plany ${year}/${year + 1}: ` + list.map(t => `${t.tt_num}${t.datefrom ? ` od ${t.datefrom}` : ""}${t.text ? ` "${t.text}"` : ""}`).join(" | "));
+    if (list.some(t => String(t.tt_num) === String(CONFIG.eduTimetable))) return CONFIG.eduTimetable;
+    const today = now.toISOString().slice(0, 10);
+    const current = [...list].filter(t => !t.datefrom || t.datefrom <= today).sort((a, b) => String(a.datefrom || "").localeCompare(String(b.datefrom || ""))).pop() || list[list.length - 1];
+    log(`  plan ${CONFIG.eduTimetable} nie jest publiczny — biorę ${current.tt_num}`);
+    return String(current.tt_num);
+  } catch (e) {
+    log(`  ! lista planów niedostępna (${e.message}) — zostaję przy ${CONFIG.eduTimetable}`);
+    return CONFIG.eduTimetable;
+  }
+}
+
 async function fetchEdupage(tries = 2) {
   const s = await edupageSession();
+  const ttNum = await pickTimetable(s);
   const res = await http(`${CONFIG.eduHost}/timetable/server/regulartt.js?__func=regularttGetData`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json", "Accept": "application/json, text/javascript, */*; q=0.01",
-      "X-Requested-With": "XMLHttpRequest", "Origin": CONFIG.eduHost, "Referer": s.viewUrl,
-      ...(s.cookie ? { "Cookie": s.cookie } : {}),
-    },
-    body: JSON.stringify({ __args: [null, CONFIG.eduTimetable], __gsh: s.gsh }),
+    method: "POST", headers: eduHeaders(s),
+    body: JSON.stringify({ __args: [null, ttNum], __gsh: s.gsh }),
   });
   const body = await res.text();
   if (!res.ok) throw new Error(`edupage HTTP ${res.status} ${res.headers.get("server") || ""} ${snippet(body)}`);
