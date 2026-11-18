@@ -1,5 +1,5 @@
 // Plik generowany przez scrape.js — nie edytuj ręcznie.
-window.SCHEDULE_META = {"generatedAt":"2026-11-16T19:39:09.606Z","classId":"*10","className":"ELE.02B"};
+window.SCHEDULE_META = {"generatedAt":"2026-11-18T11:49:59.950Z","classId":"*10","className":"ELE.02B"};
 window.WEEKENDS = [
  {
   "week": 36,
@@ -417,12 +417,47 @@ window.WEEKENDS = [
     "K2.01",
     "P1.03",
     "P1.03",
+    "P1.03"
+   ]
+  },
+  "rooms": {
+   "2026-11-21": [
+    "131",
+    "131",
+    "131",
+    "131",
+    "131",
+    "131"
+   ],
+   "2026-11-22": [
+    "131",
+    "131",
+    "131",
+    "131",
+    "131",
+    "131"
+   ]
+  },
+  "notes": {
+   "2026-11-21": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+   ],
+   "2026-11-22": [
+    null,
+    null,
+    null,
+    null,
+    null,
     null
    ]
   },
-  "rooms": {},
-  "notes": {},
-  "source": "edupage",
+  "source": "cku",
+  "ckuUrl": "https://cku.home.pl/plan_kkz/plan_21_22_11.htm",
   "zjazd": true
  },
  {
@@ -461,7 +496,7 @@ window.WEEKENDS = [
     "K1.01",
     "K2.01",
     "K2.01",
-    null
+    "K2.01"
    ]
   },
   "rooms": {},
@@ -497,7 +532,7 @@ window.WEEKENDS = [
     "W1.01",
     "K1.01",
     "K1.01",
-    null
+    "K1.01"
    ],
    "2026-12-20": [
     "W1.01",
@@ -505,7 +540,7 @@ window.WEEKENDS = [
     "W1.01",
     "K1.02",
     "K1.02",
-    null
+    "K1.02"
    ]
   },
   "rooms": {},
@@ -549,7 +584,7 @@ window.WEEKENDS = [
     "K2.01",
     "K2.01",
     "K2.01",
-    null
+    "K2.01"
    ]
   },
   "rooms": {},
@@ -583,9 +618,9 @@ window.WEEKENDS = [
     "W1.01",
     "W1.01",
     "P1.03",
-    "P1.03",
-    "P1.03",
-    "P1.03"
+    "K2.01",
+    "K2.01",
+    "K2.01"
    ],
    "2027-01-24": [
     "K1.01",
@@ -593,7 +628,7 @@ window.WEEKENDS = [
     "K1.01",
     "K1.02",
     "K1.02",
-    null
+    "K1.02"
    ]
   },
   "rooms": {},
